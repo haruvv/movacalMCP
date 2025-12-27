@@ -1,3 +1,60 @@
+<script setup>
+import { ref } from 'vue';
+
+const inputMessage = ref('');
+const messages = ref([]);
+const isLoading = ref(false);
+const previousResponseId = ref(null);
+
+const sendMessage = async () => {
+    if (!inputMessage.value.trim() || isLoading.value) return;
+
+    const userMessage = inputMessage.value.trim();
+    messages.value.push({ content: userMessage, isUser: true });
+    inputMessage.value = '';
+    isLoading.value = true;
+
+    try {
+    const payload = { message: userMessage };
+    if (previousResponseId.value) {
+        payload.previous_response_id = previousResponseId.value;
+    }
+
+    const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        messages.value.push({
+        content: `エラー: ${data?.error || 'リクエストに失敗しました'}`,
+        isUser: false,
+        });
+        return;
+    }
+
+    messages.value.push({
+        content: data?.message || '応答がありませんでした',
+        isUser: false,
+    });
+
+    if (data?.response_id) {
+        previousResponseId.value = data.response_id;
+    }
+    } catch (error) {
+    messages.value.push({
+        content: `エラー: ${error?.message || '通信に失敗しました'}`,
+        isUser: false,
+    });
+    } finally {
+    isLoading.value = false;
+    }
+};
+</script>    
+
 <template>
     <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div class="w-full max-w-2xl bg-white rounded-lg shadow-lg h-[600px] flex flex-col">
@@ -64,58 +121,4 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { router } from '@inertiajs/vue3';
-
-const inputMessage = ref('');
-const messages = ref([]);
-const isLoading = ref(false);
-
-const sendMessage = async () => {
-    if (!inputMessage.value.trim() || isLoading.value) return;
-
-    const userMessage = inputMessage.value.trim();
-    messages.value.push({
-        content: userMessage,
-        isUser: true,
-    });
-    inputMessage.value = '';
-    isLoading.value = true;
-
-    try {
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
-            body: JSON.stringify({ message: userMessage }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            messages.value.push({
-                content: `エラー: ${data.error || 'リクエストに失敗しました'}`,
-                isUser: false,
-            });
-            return;
-        }
-
-        messages.value.push({
-            content: data.message || '応答がありませんでした',
-            isUser: false,
-        });
-    } catch (error) {
-        messages.value.push({
-            content: `エラー: ${error.message}`,
-            isUser: false,
-        });
-    } finally {
-        isLoading.value = false;
-    }
-};
-</script>
-
+    

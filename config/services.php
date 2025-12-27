@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'mcp' => [
+        'server_url' => env('MCP_SERVER_URL'),
+        'authorization' => env('MCP_AUTHORIZATION'),
+        'allowed_tools' => env('MCP_ALLOWED_TOOLS')
+            ? array_values(array_filter(array_map('trim', explode(',', env('MCP_ALLOWED_TOOLS')))))
+            : null,
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'api_base_url' => 'https://api.openai.com/v1',
+        'model' => env('OPENAI_MODEL', 'gpt-4o'),
+    ],
+
 ];
