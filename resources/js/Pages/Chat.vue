@@ -15,42 +15,45 @@ const sendMessage = async () => {
     isLoading.value = true;
 
     try {
-    const payload = { message: userMessage };
-    if (previousResponseId.value) {
-        payload.previous_response_id = previousResponseId.value;
-    }
+        const payload = { message: userMessage };
+        if (previousResponseId.value) {
+            payload.previous_response_id = previousResponseId.value;
+        }
 
-    const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-        messages.value.push({
-        content: `エラー: ${data?.error || 'リクエストに失敗しました'}`,
-        isUser: false,
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_CHAT_API_TOKEN || ''}`,
+            },
+            body: JSON.stringify(payload),
         });
-        return;
-    }
 
-    messages.value.push({
-        content: data?.message || '応答がありませんでした',
-        isUser: false,
-    });
+        const data = await response.json().catch(() => ({}));
 
-    if (data?.response_id) {
-        previousResponseId.value = data.response_id;
-    }
+        if (!response.ok) {
+            messages.value.push({
+                content: `エラー: ${data?.error || 'リクエストに失敗しました'}`,
+                isUser: false,
+            });
+            return;
+        }
+
+        messages.value.push({
+            content: data?.message || '応答がありませんでした',
+            isUser: false,
+        });
+
+        if (data?.response_id) {
+            previousResponseId.value = data.response_id;
+        }
     } catch (error) {
-    messages.value.push({
-        content: `エラー: ${error?.message || '通信に失敗しました'}`,
-        isUser: false,
-    });
+        messages.value.push({
+            content: `エラー: ${error?.message || '通信に失敗しました'}`,
+            isUser: false,
+        });
     } finally {
-    isLoading.value = false;
+        isLoading.value = false;
     }
 };
 </script>    

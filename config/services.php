@@ -49,4 +49,8 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o'),
     ],
 
+    'chat' => [
+        'api_token' => env('CHAT_API_TOKEN'),
+    ],
+
 ];
