@@ -34,6 +34,7 @@ class HandleInertiaRequestsMiddleware extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'chatApiToken' => config('services.chat.api_token'),
         ];
     }
 }

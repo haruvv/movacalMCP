@@ -1,5 +1,9 @@
 <script setup>
 import { ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const chatApiToken = page.props.chatApiToken || '';
 
 const inputMessage = ref('');
 const messages = ref([]);
@@ -24,7 +28,7 @@ const sendMessage = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${import.meta.env.VITE_CHAT_API_TOKEN || ''}`,
+                'Authorization': `Bearer ${chatApiToken}`,
             },
             body: JSON.stringify(payload),
         });
