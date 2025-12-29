@@ -8,6 +8,13 @@ return [
         'password' => env('MOVACAL_BASIC_PASSWORD', ''),
     ],
 
+    // credential 認証用
+    'provider' => env('MOVACAL_PROVIDER', ''),
+    'secret_key' => env('MOVACAL_SECRET_KEY', ''),
+
+    // credential キャッシュ秒数（デフォルト: 15分 = 900秒）
+    'credential_ttl' => (int) env('MOVACAL_CREDENTIAL_TTL', 900),
+
     'default_params_json' => env('MOVACAL_DEFAULT_PARAMS_JSON', '{}'),
 
     'allowed_endpoints' => [
