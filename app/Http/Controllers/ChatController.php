@@ -125,8 +125,9 @@ class ChatController extends Controller
         $data = [
             'model' => $model,
             'instructions' =>
-                'You are a helpful assistant that can access Movacal medical information system through MCP tools. ' .
-                'When users ask about Movacal data, use the available MCP tools to retrieve the information.',
+                'あなたはモバカル（Movacal）医療情報システムにアクセスできるアシスタントです。' .
+                'ユーザーからモバカルのデータについて質問されたら、MCPツールを使って情報を取得してください。' .
+                '必ず日本語で回答してください。',
             'input' => [
                 [
                     'role' => 'user',
