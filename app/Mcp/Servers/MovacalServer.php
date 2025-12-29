@@ -3,7 +3,7 @@
 namespace App\Mcp\Servers;
 
 use Laravel\Mcp\Server;
-use App\Mcp\Tools\MovacalPostTool;
+use App\Mcp\Tools\MovacalGetTool;
 
 class MovacalServer extends Server
 {
@@ -21,34 +21,34 @@ class MovacalServer extends Server
      * The MCP server's instructions for the LLM.
      */
     protected string $instructions = <<<'MARKDOWN'
-        This MCP server provides access to the Movacal API, a medical information system.
-
-        ## Available Tools
-
-        ### movacal_post
-        Send POST requests to Movacal API endpoints with Basic Authentication.
-
-        **Usage:**
-        - Specify the endpoint filename (e.g., `getPatient.php`, `postSchedule.php`, `getDiaglist.php`)
-        - Provide request parameters as an object in the `payload` field
-        - The payload will be merged with default parameters configured in the environment
-        - Choose between JSON (`as_json: true`) or form-encoded (`as_json: false`) request format
-
-        **Example endpoints:**
-        - `getPatient.php` - Get patient information
-        - `getPatientlist.php` - Get list of patients
-        - `postSchedule.php` - Create or update schedule
-        - `getDiaglist.php` - Get diagnosis list
-        - `getVersion.php` - Get API version
-
-        **Important:**
-        - Only endpoints in the allowlist can be accessed
-        - All requests use Basic Authentication (configured server-side)
-        - Default parameters are automatically merged with your payload
-        - Response format depends on the endpoint (usually JSON)
-
-        When a user asks about Movacal data or operations, use the `movacal_post` tool with the appropriate endpoint and parameters.
+        This MCP server provides **read-only** access to the Movacal API (a medical information system).
+        
+        ## Safety / Non-negotiables
+        - **Do NOT perform any write operations** (create/update/delete). This server is read-only.
+        - Use only the provided tool `movacal_get`.
+        - Only endpoints starting with `get` AND present in the server-side allowlist can be called.
+        - Treat all returned data as sensitive medical information. Avoid unnecessary repetition of personally identifiable information (PII).
+        
+        ## Available Tool
+        
+        ### movacal_get (read-only)
+        Fetch data from Movacal API using credential authentication.
+        - Only `get*` endpoints are allowed (read-only, safe)
+        - Uses Basic Authentication + credential (HMAC-SHA256) managed by the server
+        - Credential is automatically managed and cached
+        - Provide request parameters via `params` as a JSON object
+        
+        **Parameters**
+        - `endpoint` (string, required): Endpoint filename (e.g., `getPatientlist.php`)
+        - `params` (object, optional): Request parameters to include in the POST body
+        - `timeout_seconds` (integer, optional): Request timeout (default 30)
+        
+        **Usage Notes**
+        - Prefer the minimum parameters needed to fulfill the request.
+        - If you are unsure which endpoint to call, ask the user for clarification rather than guessing.
+        - The server will reject non-allowlisted endpoints.
     MARKDOWN;
+    
 
     /**
      * The tools registered with this MCP server.
@@ -56,7 +56,7 @@ class MovacalServer extends Server
      * @var array<int, class-string<\Laravel\Mcp\Server\Tool>>
      */
     protected array $tools = [
-        MovacalPostTool::class,
+        MovacalGetTool::class,
     ];
 
     /**
