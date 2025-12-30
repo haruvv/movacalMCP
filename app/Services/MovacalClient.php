@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -69,19 +70,35 @@ class MovacalClient
 
         $url = "{$this->baseUrl}/{$endpoint}";
 
+        Log::info('[Movacal] API request started', [
+            'endpoint' => $endpoint,
+        ]);
+
         // credential 取得してリクエスト
         $credential = $this->credentialService->getCredential();
         $response = $this->post($url, $this->withCredential($mergedParams, $credential), $timeout);
 
         // 401 なら refresh して1回だけリトライ
         if ($response->status() === 401) {
+            Log::warning('[Movacal] API 401 received, refreshing credential', [
+                'endpoint' => $endpoint,
+            ]);
             $credential = $this->credentialService->refreshCredential();
             $response = $this->post($url, $this->withCredential($mergedParams, $credential), $timeout);
         }
 
         if (!$response->successful()) {
+            Log::error('[Movacal] API request failed', [
+                'endpoint' => $endpoint,
+                'status' => $response->status(),
+            ]);
             throw new RuntimeException("Upstream error: HTTP {$response->status()}");
         }
+
+        Log::info('[Movacal] API request succeeded', [
+            'endpoint' => $endpoint,
+            'status' => $response->status(),
+        ]);
 
         $contentType = (string) $response->header('content-type', '');
 

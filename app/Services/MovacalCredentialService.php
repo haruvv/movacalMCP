@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -69,6 +70,10 @@ class MovacalCredentialService
     {
         $url = "{$this->baseUrl}/credential.php";
 
+        Log::info('[Movacal] Credential fetch started', [
+            'provider' => $this->provider,
+        ]);
+
         // randomを生成
         $randomBytes = random_bytes(32);
         $randomB64   = base64_encode($randomBytes);
@@ -89,14 +94,26 @@ class MovacalCredentialService
             ]);
 
         if (!$response->successful()) {
+            Log::error('[Movacal] Credential fetch failed', [
+                'status' => $response->status(),
+                'provider' => $this->provider,
+            ]);
             throw new RuntimeException("Failed to fetch credential: HTTP {$response->status()}");
         }
 
         $data = $response->json();
 
         if (!isset($data['credential']) || !is_string($data['credential'])) {
+            Log::error('[Movacal] Credential response invalid', [
+                'provider' => $this->provider,
+                'has_credential_field' => isset($data['credential']),
+            ]);
             throw new RuntimeException('Invalid credential response: missing credential field.');
         }
+
+        Log::info('[Movacal] Credential fetch succeeded', [
+            'provider' => $this->provider,
+        ]);
 
         return $data['credential'];
     }
