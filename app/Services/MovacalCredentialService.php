@@ -74,7 +74,7 @@ class MovacalCredentialService
         $randomB64   = base64_encode($randomBytes);
 
         // signatureを生成
-        $signatureBytes = hash_hmac('sha256', $randomBytes, $this->secretKey, true);
+        $signatureBytes = hash_hmac('sha256', $randomB64, $this->secretKey, true);
         $signatureB64   = base64_encode($signatureBytes);
 
         /** @var \Illuminate\Http\Client\Response $response */
