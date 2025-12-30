@@ -15,40 +15,37 @@ class MovacalServer extends Server
     /**
      * The MCP server's version.
      */
-    protected string $version = '0.0.1';
+    protected string $version = '0.1.0';
 
     /**
      * The MCP server's instructions for the LLM.
      */
     protected string $instructions = <<<'MARKDOWN'
-        This MCP server provides **read-only** access to the Movacal API (a medical information system).
+        このMCPサーバーはモバカルAPI（医療情報システム）への**読み取り専用**アクセスを提供します。
         
-        ## Safety / Non-negotiables
-        - **Do NOT perform any write operations** (create/update/delete). This server is read-only.
-        - Use only the provided tool `movacal_get`.
-        - Only endpoints starting with `get` AND present in the server-side allowlist can be called.
-        - Treat all returned data as sensitive medical information. Avoid unnecessary repetition of personally identifiable information (PII).
+        ## 安全性に関する注意
+        - **書き込み操作（作成/更新/削除）は絶対に行わないでください**。このサーバーは読み取り専用です。
+        - 提供されている `movacal_get` ツールのみを使用してください。
+        - 返却されるデータは機密性の高い医療情報です。個人情報（PII）の不必要な繰り返しは避けてください。
         
-        ## Available Tool
+        ## 利用可能なツール
         
-        ### movacal_get (read-only)
-        Fetch data from Movacal API using credential authentication.
-        - Only `get*` endpoints are allowed (read-only, safe)
-        - Uses Basic Authentication + credential (HMAC-SHA256) managed by the server
-        - Credential is automatically managed and cached
-        - Provide request parameters via `params` as a JSON object
+        ### movacal_get（読み取り専用）
+        モバカルAPIからデータを取得します。
+        - operation（操作名）を指定してください
+        - endpoint名を直接指定する必要はありません
         
-        **Parameters**
-        - `endpoint` (string, required): Endpoint filename (e.g., `getPatientlist.php`)
-        - `params` (object, optional): Request parameters to include in the POST body
-        - `timeout_seconds` (integer, optional): Request timeout (default 30)
+        **パラメータ**
+        - `operation` (string, required): 操作名（例: `get_version`）
+        - `args` (object, optional): 操作に必要な引数
         
-        **Usage Notes**
-        - Prefer the minimum parameters needed to fulfill the request.
-        - If you are unsure which endpoint to call, ask the user for clarification rather than guessing.
-        - The server will reject non-allowlisted endpoints.
+        **利用可能な operation**
+        - `get_version`: APIバージョン情報を取得
+        
+        **使用上の注意**
+        - どの operation を使うべきかわからない場合は、推測せずにユーザーに確認してください。
     MARKDOWN;
-    
+
 
     /**
      * The tools registered with this MCP server.
