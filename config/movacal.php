@@ -15,7 +15,11 @@ return [
     // credentialキャッシュ秒数（デフォルト: 15分 = 900秒）
     'credential_ttl' => (int) env('MOVACAL_CREDENTIAL_TTL', 900),
 
-    'default_params_json' => env('MOVACAL_DEFAULT_PARAMS_JSON', '{}'),
+    // クリニック情報（必須）
+    'clinic_info' => [
+        'clinic_id' => env('MOVACAL_CLINIC_ID', ''),
+        'clinic_code' => env('MOVACAL_CLINIC_CODE', ''),
+    ],
 
     'allowed_endpoints' => [
         'getPatientlist.php',

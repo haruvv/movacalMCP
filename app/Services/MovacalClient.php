@@ -17,7 +17,7 @@ class MovacalClient
     private string $baseUrl;
     private string $basicId;
     private string $basicPw;
-    private array $defaultParams;
+    private array $clinicInfo;
     private array $allowedEndpoints;
     private MovacalCredentialService $credentialService;
 
@@ -29,9 +29,10 @@ class MovacalClient
         $this->basicId = (string) config('movacal.basic.id');
         $this->basicPw = (string) config('movacal.basic.password');
         $this->allowedEndpoints = (array) config('movacal.allowed_endpoints', []);
-        $this->defaultParams = $this->decodeDefaultParams(
-            (string) config('movacal.default_params_json', '{}')
-        );
+        $this->clinicInfo = [
+            'clinic_id' => (string) config('movacal.clinic_info.clinic_id', ''),
+            'clinic_code' => (string) config('movacal.clinic_info.clinic_code', ''),
+        ];
 
         $this->validateConfig();
     }
@@ -63,13 +64,8 @@ class MovacalClient
         // timeout ガード
         $timeout = max(1, min(60, $timeout));
 
-        // default_params とマージ
-        $mergedParams = array_merge($this->defaultParams, $params);
-
-        // clinic_info の存在チェック
-        if (empty($mergedParams['clinic_info']['clinic_id']) || empty($mergedParams['clinic_info']['clinic_code'])) {
-            throw new RuntimeException('clinic_info (clinic_id, clinic_code) is required but not configured in default_params_json.');
-        }
+        // clinic_info を params にマージ
+        $mergedParams = array_merge(['clinic_info' => $this->clinicInfo], $params);
 
         $url = "{$this->baseUrl}/{$endpoint}";
 
@@ -145,15 +141,6 @@ class MovacalClient
     }
 
     /**
-     * JSON文字列をデコード
-     */
-    private function decodeDefaultParams(string $json): array
-    {
-        $decoded = json_decode($json, true);
-        return is_array($decoded) ? $decoded : [];
-    }
-
-    /**
      * 設定値のバリデーション
      */
     private function validateConfig(): void
@@ -163,6 +150,9 @@ class MovacalClient
         }
         if ($this->basicId === '' || $this->basicPw === '') {
             throw new RuntimeException('MOVACAL_BASIC_ID / MOVACAL_BASIC_PASSWORD is not configured.');
+        }
+        if ($this->clinicInfo['clinic_id'] === '' || $this->clinicInfo['clinic_code'] === '') {
+            throw new RuntimeException('MOVACAL_CLINIC_ID / MOVACAL_CLINIC_CODE is not configured.');
         }
     }
 }
