@@ -2,6 +2,7 @@
 
 namespace App\Services\Movacal;
 
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -34,14 +35,24 @@ class MovacalReadRouter
      */
     public function execute(string $operation, array $args = []): array
     {
+        Log::info('[Router] Executing operation', [
+            'operation' => $operation,
+        ]);
+
         if (!$this->isAllowedOperation($operation)) {
             throw new RuntimeException("Unknown or disallowed operation: {$operation}");
         }
 
-        return match ($operation) {
+        $result = match ($operation) {
             'get_version' => $this->versionApi->getVersion(),
             default => throw new RuntimeException("Operation not implemented: {$operation}"),
         };
+
+        Log::info('[Router] Operation completed', [
+            'operation' => $operation,
+        ]);
+
+        return $result;
     }
 
     /**
