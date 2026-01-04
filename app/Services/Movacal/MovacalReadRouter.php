@@ -14,14 +14,16 @@ class MovacalReadRouter
      */
     public const ALLOWED_OPERATIONS = [
         'get_version',
-        // 今後追加: 'get_patient', 'get_patient_list', etc.
+        'get_file_category',
     ];
 
     private VersionApi $versionApi;
+    private FileCategoryApi $fileCategoryApi;
 
-    public function __construct(VersionApi $versionApi)
+    public function __construct(VersionApi $versionApi, FileCategoryApi $fileCategoryApi)
     {
         $this->versionApi = $versionApi;
+        $this->fileCategoryApi = $fileCategoryApi;
     }
 
     /**
@@ -40,6 +42,7 @@ class MovacalReadRouter
 
         return match ($operation) {
             'get_version' => $this->versionApi->getVersion(),
+            'get_file_category' => $this->fileCategoryApi->getFileCategory(),
             default => throw new RuntimeException("Operation not implemented: {$operation}"),
         };
     }
