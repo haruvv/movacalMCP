@@ -69,13 +69,13 @@ class MovacalCredentialService
     {
         $url = "{$this->baseUrl}/credential.php";
 
-        // randomを生成
+        // 乱数を生成
         $randomBytes = random_bytes(32);
-        $randomB64   = base64_encode($randomBytes);
+        $randomB64 = base64_encode($randomBytes);
 
-        // signatureを生成
-        $signatureBytes = hash_hmac('sha256', $randomB64, $this->secretKey, true);
-        $signatureB64   = base64_encode($signatureBytes);
+        // 署名値を生成
+        $signatureHex = hash_hmac('sha256', $randomBytes, $this->secretKey);
+        $signatureB64 = base64_encode($signatureHex);
 
         /** @var \Illuminate\Http\Client\Response $response */
         $response = Http::withBasicAuth($this->basicId, $this->basicPw)
