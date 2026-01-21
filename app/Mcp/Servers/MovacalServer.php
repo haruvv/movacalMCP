@@ -2,7 +2,11 @@
 
 namespace App\Mcp\Servers;
 
+use Illuminate\Support\Facades\Log;
 use Laravel\Mcp\Server;
+use Laravel\Mcp\Server\Methods\Initialize;
+use Laravel\Mcp\Server\ServerContext;
+use Laravel\Mcp\Server\Transport\JsonRpcRequest;
 use App\Mcp\Tools\MovacalGetTool;
 
 class MovacalServer extends Server
@@ -84,4 +88,21 @@ class MovacalServer extends Server
     protected array $prompts = [
         //
     ];
+
+    /**
+     * Handle the initialize message and log the response.
+     */
+    protected function handleInitializeMessage(JsonRpcRequest $request, ServerContext $context): void
+    {
+        $response = (new Initialize)->handle($request, $context);
+        $responseJson = $response->toJson();
+
+        Log::info('MCP initialize response', [
+            'mcp.method' => 'initialize',
+            'mcp.request_id' => $request->id,
+            'response.json' => $responseJson,
+        ]);
+
+        $this->transport->send($responseJson, $this->generateSessionId());
+    }
 }
