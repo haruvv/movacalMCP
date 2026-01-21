@@ -18,6 +18,17 @@ class MovacalServer extends Server
     protected string $version = '0.1.0';
 
     /**
+     * Supported MCP protocol versions.
+     *
+     * @var array<int, string>
+     */
+    protected array $supportedProtocolVersion = [
+        '2025-06-18',
+        '2025-03-26',
+        '2024-11-05',
+    ];
+
+    /**
      * The MCP server's instructions for the LLM.
      */
     protected string $instructions = <<<'MARKDOWN'
